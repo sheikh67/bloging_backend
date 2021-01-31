@@ -3,6 +3,7 @@ const userRouter = express.Router();
 const userController = require("../controller/user.controller");
 const { validateUser, auth } = require("../middelware/user.Validator");
 
+userRouter.route("/getUsers").get(auth, userController.getAllUser);
 userRouter
   .route("/users")
   .post(validateUser, userController.register)
@@ -11,9 +12,5 @@ userRouter
   .get(auth, userController.getUser);
 
 userRouter.route("/login").post(userController.login);
-
-userRouter.get("/hello", (req, res) => {
-  res.json({ message: "hello from user router" });
-});
 
 module.exports = userRouter;

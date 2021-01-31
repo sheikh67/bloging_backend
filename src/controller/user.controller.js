@@ -12,12 +12,12 @@ exports.login = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(400).json("invalid credentials");
+      return res.status(400).json("invalid username or password");
     }
 
     const _matchPass = await bcrypt.compare(req.body.password, user.password);
     if (!_matchPass) {
-      return res.status(400).json("invalid credentials");
+      return res.status(400).json("invalid username or password");
     }
 
     const payload = {
@@ -54,11 +54,12 @@ exports.login = async (req, res) => {
  * It will generate Api key, append it with user and save it to database
  */
 exports.register = async (req, res) => {
-  const {
+  let {
     username,
     email,
     password,
     phone,
+    role,
     totalfollowing,
     totalfollowers,
   } = req.body;
@@ -69,18 +70,22 @@ exports.register = async (req, res) => {
         msg: "User Already Exists",
       });
     }
+    if (role == null || role === "") {
+      role = "client";
+    }
 
-    let api_key = genApiKey.create();
-    api_key = api_key.apiKey;
+    let apikey = genApiKey.create();
+    apikey = apikey.apiKey;
 
     user = new User({
       username,
       email,
       phone,
+      role,
       totalfollowing,
       totalfollowers,
       password,
-      api_key,
+      apikey,
     });
 
     let salt = await bcrypt.genSalt(10);
@@ -122,6 +127,20 @@ exports.register = async (req, res) => {
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    res.json(user);
+  } catch (e) {
+    res.send({ message: "Error in Fetching user" });
+  }
+};
+
+/**
+ * For authenticate the user
+ * @param {Object} req - caching the  from the request URL
+ * @param {Object} res - sending response back to to the client
+ */
+exports.getAllUser = async (req, res) => {
+  try {
+    const user = await User.find();
     res.json(user);
   } catch (e) {
     res.send({ message: "Error in Fetching user" });
@@ -183,18 +202,21 @@ exports.updateUser = async (req, res) => {
  * @param {Object} res - sending response back to to the client
  */
 exports.deleteUser = (req, res) => {
-  try {
-    User.deleteOne({ _id: req.user.id }, (err, response) => {
-      if (err) throw err;
-
-      if (response.n > 0) {
-        res.status(200).json({ msg: "deleted" });
-      } else {
-        res.status(400).json({ msg: "user not found" });
-      }
-    });
-  } catch (error) {
-    console.log(error.message);
-    res.status(500).send("internal server error");
+  if (req.user.role === "admin") {
+    try {
+      User.deleteOne({ _id: req.body.id }, (err, response) => {
+        if (err) throw err;
+        if (response.n > 0) {
+          res.status(200).json({ msg: "user deleted" });
+        } else {
+          res.status(400).json({ msg: "user not found" });
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).send("internal server error");
+    }
+  } else {
+    res.status(401).json({ message: "Unauthorized Access" });
   }
 };

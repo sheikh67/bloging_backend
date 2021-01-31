@@ -30,11 +30,14 @@ const UserSchema = new Schema({
     required: true,
     min: 8,
   },
-  api_key: {
+  apikey: {
     type: String,
     required: true,
   },
-  created_at: {
+  role: {
+    type: String,
+  },
+  createdat: {
     type: Date,
     default: Date.now(),
   },
