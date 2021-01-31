@@ -12,4 +12,8 @@ userRouter
 
 userRouter.route("/login").post(userController.login);
 
+userRouter.route("/").get((req, res) => {
+  res.json({ message: "hello from user router" });
+});
+
 module.exports = userRouter;
