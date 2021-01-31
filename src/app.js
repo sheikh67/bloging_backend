@@ -1,17 +1,27 @@
-const express = require('express');
+const express = require("express");
+const serverless = require("serverless-http");
 const app = express();
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const todoRouter = require('./routers/todo.router');
-const userRouter = require('./routers/user.router');
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const todoRouter = require("./routers/todo.router");
+const userRouter = require("./routers/user.router");
+const router = express.Router();
 
 require("dotenv").config();
-require('./db/db.config');
+require("./db/db.config");
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/api/v1', todoRouter);
-app.use('/api/v1', userRouter);
+app.use("/.netlify/functions/api/v1", todoRouter);
+app.use("/.netlify/functions/api/v1", userRouter);
 
+router.get("/", (req, res) => {
+  res.json({
+    hello: "hi!",
+  });
+});
+
+app.use(`/.netlify/functions/api`, router);
 
 module.exports = app;
+module.exports.handler = serverless(app);
