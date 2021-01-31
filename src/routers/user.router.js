@@ -12,7 +12,7 @@ userRouter
 
 userRouter.route("/login").post(userController.login);
 
-userRouter.route("/").get((req, res) => {
+userRouter.get("/hello", (req, res) => {
   res.json({ message: "hello from user router" });
 });
 

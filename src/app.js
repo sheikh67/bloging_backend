@@ -12,8 +12,8 @@ require("./db/db.config");
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use("/.netlify/functions/api/v1", todoRouter);
-app.use("/.netlify/functions/api/v1", userRouter);
+app.use("/.netlify/functions/app", todoRouter);
+app.use("/.netlify/functions/app", userRouter);
 
 router.get("/", (req, res) => {
   res.json({
@@ -21,7 +21,7 @@ router.get("/", (req, res) => {
   });
 });
 
-app.use(`/.netlify/functions/api`, router);
+app.use(`/.netlify/functions/app`, router);
 
 module.exports = app;
 module.exports.handler = serverless(app);
